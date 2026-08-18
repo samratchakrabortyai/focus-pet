@@ -194,18 +194,66 @@ button:hover {
 }
 
 /* Sad State */
-.sad .eye {
+.sad .eye, .crying .eye {
     height: 40px;
     width: 70px;
     border-radius: 50% 50% 20% 20%;
     background: #a8c0ff;
     box-shadow: 0 0 30px 10px rgba(168, 192, 255, 0.4);
+    position: relative;
 }
-.sad .left-eye {
+.sad .left-eye, .crying .left-eye {
     transform: rotate(-15deg) translateY(10px);
 }
-.sad .right-eye {
+.sad .right-eye, .crying .right-eye {
     transform: rotate(15deg) translateY(10px);
+}
+
+/* Tear Drop Animation */
+.crying .eye::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 10px;
+    background: #a8c0ff;
+    border-radius: 50% 50% 50% 0; /* Tear shape */
+    box-shadow: 0 0 10px 2px rgba(168, 192, 255, 0.6);
+    animation: tearDrop 1.5s infinite ease-in;
+    opacity: 0;
+}
+
+.crying .left-eye::after {
+    animation-delay: 0s;
+}
+
+.crying .right-eye::after {
+    animation-delay: 0.75s; /* Alternate tears */
+}
+
+@keyframes tearDrop {
+    0% {
+        bottom: -5px;
+        transform: translateX(-50%) rotate(45deg) scale(0);
+        opacity: 0;
+    }
+    20% {
+        bottom: -15px;
+        transform: translateX(-50%) rotate(45deg) scale(1);
+        opacity: 1;
+    }
+    80% {
+        bottom: -60px;
+        transform: translateX(-50%) rotate(45deg) scale(0.8);
+        opacity: 1;
+    }
+    100% {
+        bottom: -70px;
+        transform: translateX(-50%) rotate(45deg) scale(0);
+        opacity: 0;
+    }
 }
 
 /* Happy State */

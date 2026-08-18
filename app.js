@@ -54,6 +54,7 @@ const PetState = {
     WAKE: 'wake',
     ANGRY: 'angry',
     SAD: 'sad',
+    CRYING: 'crying',
     BLINK: 'blink',
     HAPPY: 'happy',
     
@@ -261,7 +262,7 @@ function handleDisturbance(severity = 'angry') {
                 let msgList;
                 if (disturbanceCount >= 3) {
                     msgList = CRYING_MESSAGES;
-                    severity = 'sad'; // Force sad crying eyes if shaken repeatedly
+                    severity = 'crying'; // Force sad crying eyes if shaken repeatedly
                 } else {
                     msgList = severity === 'sad' ? SAD_MESSAGES : ANGRY_MESSAGES;
                 }
@@ -274,6 +275,10 @@ function handleDisturbance(severity = 'angry') {
 
                 if (severity === 'sad') {
                     PetState.set(PetState.SAD);
+                    UI.msgContainer.classList.add('sad-msg');
+                    showMessage(msg);
+                } else if (severity === 'crying') {
+                    PetState.set(PetState.CRYING);
                     UI.msgContainer.classList.add('sad-msg');
                     showMessage(msg);
                 } else {
