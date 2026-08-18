@@ -133,11 +133,10 @@ button:hover {
 
 #datetime-display {
     position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.6);
+    bottom: 10px;
+    right: 15px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
     z-index: 100;
     font-family: monospace;
 }
@@ -221,6 +220,8 @@ button:hover {
     align-items: center;
     justify-content: center;
     width: 100%;
+    position: relative;
+    z-index: 100; /* Keep eyes above the dimmer */
 }
 
 .eyes-container {
