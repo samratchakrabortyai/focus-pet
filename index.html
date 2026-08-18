@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Focus Pet</title>
+    <meta name="description" content="A focus-timer app where your phone becomes a sleeping digital creature.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="start-screen" class="screen">
+        <h1>Focus Pet</h1>
+        <div class="control-group">
+            <select id="duration" aria-label="Focus Duration">
+                <option value="1">1 Minute (Test)</option>
+                <option value="15">15 Minutes</option>
+                <option value="30">30 Minutes</option>
+                <option value="45">45 Minutes</option>
+                <option value="60">60 Minutes</option>
+            </select>
+        </div>
+        <button id="start-btn">Start Focus</button>
+    </div>
+
+    <div id="focus-screen" class="screen hidden">
+        <div id="timer-display" class="tiny-timer"></div>
+        
+        <div id="pet-container">
+            <div class="eyes-container sleeping" id="eyes">
+                <div class="eye left-eye"></div>
+                <div class="eye right-eye"></div>
+            </div>
+            <div id="message-container" class="hidden"></div>
+        </div>
+        
+        <button id="restart-btn" class="hidden">Restart</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
