@@ -4,19 +4,37 @@ const COOLDOWN_TIME = 4000;   // ms before settling back to sleep
 
 const ANGRY_MESSAGES = [
     "Don't touch me, Sam.",
-    "Put me down, Sam.",
-    "Focus, Sam!"
+    "Put me down right now, Sam.",
+    "Focus on your work, Sam!",
+    "Are you supposed to be holding me, Sam?",
+    "Hands off, Sam!",
+    "I was sleeping! Get back to work.",
+    "Do you mind, Sam?",
+    "This isn't focus time if you keep touching me.",
+    "Leave me alone, Sam!",
+    "I said no touching!"
 ];
 
 const SAD_MESSAGES = [
     "Don't disturb me and work, Sam.",
-    "Please let me sleep, Sam."
+    "Please let me sleep, Sam.",
+    "Why the shaking, Sam?",
+    "I'm trying to rest here...",
+    "Sam, you're interrupting my nap.",
+    "Just leave me on the desk, Sam.",
+    "Careful! I'm resting.",
+    "Can't a digital pet get some peace?"
 ];
 
 const CRYING_MESSAGES = [
     "Please stop, Sam...",
-    "Why are you doing this, Sam?",
-    "*sniffles* Let me sleep, Sam!"
+    "Why are you doing this to me, Sam?",
+    "*sniffles* Let me sleep, Sam!",
+    "You're making this really hard, Sam.",
+    "I'm so tired, please let me rest...",
+    "Sam, this isn't funny anymore.",
+    "Why won't you just focus?",
+    "*crying* Just put me down!"
 ];
 
 const UI = {
@@ -58,6 +76,7 @@ let praiseTimeout = null;
 
 let disturbanceCount = 0;
 let continuousFocusTime = 0;
+let lastMessage = "";
 
 // Initialize events
 UI.startBtn.addEventListener('click', startSession);
@@ -247,7 +266,11 @@ function handleDisturbance(severity = 'angry') {
                     msgList = severity === 'sad' ? SAD_MESSAGES : ANGRY_MESSAGES;
                 }
                 
-                const msg = msgList[Math.floor(Math.random() * msgList.length)];
+                let msg;
+                do {
+                    msg = msgList[Math.floor(Math.random() * msgList.length)];
+                } while (msg === lastMessage && msgList.length > 1);
+                lastMessage = msg;
 
                 if (severity === 'sad') {
                     PetState.set(PetState.SAD);
@@ -265,7 +288,12 @@ function handleDisturbance(severity = 'angry') {
         if (severity === 'angry' && PetState.current === PetState.SAD && disturbanceCount < 3) {
             PetState.set(PetState.ANGRY);
             UI.msgContainer.classList.remove('sad-msg');
-            showMessage(ANGRY_MESSAGES[Math.floor(Math.random() * ANGRY_MESSAGES.length)]);
+            let msg;
+            do {
+                msg = ANGRY_MESSAGES[Math.floor(Math.random() * ANGRY_MESSAGES.length)];
+            } while (msg === lastMessage && ANGRY_MESSAGES.length > 1);
+            lastMessage = msg;
+            showMessage(msg);
         }
     }
     
