@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Focus Pet</title>
+    <meta name="description" content="A focus-timer app where your phone becomes a sleeping digital creature.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button id="fullscreen-toggle" class="icon-btn" aria-label="Toggle Fullscreen">
+        <svg id="fs-icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+    </button>
+
+    <div id="start-screen" class="screen">
+        <h1>Focus Pet</h1>
+        <div class="control-group">
+            <select id="duration" aria-label="Focus Duration">
+                <option value="1">1 Minute (Test)</option>
+                <option value="15">15 Minutes</option>
+                <option value="30">30 Minutes</option>
+                <option value="45">45 Minutes</option>
+                <option value="60">60 Minutes</option>
+            </select>
+        </div>
+        <button id="start-btn">Start Focus</button>
+    </div>
+
+    <div id="focus-screen" class="screen hidden">
+        <div id="timer-display" class="tiny-timer"></div>
+        
+        <div id="pet-container">
+            <div class="eyes-container sleeping" id="eyes">
+                <div class="eye left-eye"></div>
+                <div class="eye right-eye"></div>
+            </div>
+            <div id="message-container" class="hidden"></div>
+        </div>
+        
+        <button id="restart-btn" class="hidden">Restart</button>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

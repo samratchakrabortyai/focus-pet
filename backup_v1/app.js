@@ -1,22 +1,12 @@
-const MOTION_THRESHOLD_LOW = 2.5; // m/s^2 deviation for deliberate medium shake (sad)
-const MOTION_THRESHOLD_HIGH = 5.0; // m/s^2 deviation for strong shake (angry)
+const MOTION_THRESHOLD_LOW = 1.0; // m/s^2 deviation for slight shake (sad)
+const MOTION_THRESHOLD_HIGH = 2.5; // m/s^2 deviation for strong shake (angry)
 const COOLDOWN_TIME = 4000;   // ms before settling back to sleep
 
-const ANGRY_MESSAGES = [
-    "Don't touch me, Sam.",
-    "Put me down, Sam.",
-    "Focus, Sam!"
-];
-
-const SAD_MESSAGES = [
-    "Don't disturb me and work, Sam.",
-    "Please let me sleep, Sam."
-];
-
-const CRYING_MESSAGES = [
-    "Please stop, Sam...",
-    "Why are you doing this, Sam?",
-    "*sniffles* Let me sleep, Sam!"
+const MESSAGES = [
+    "Don't touch me.",
+    "Put me down.",
+    "I'm trying to sleep.",
+    "Focus, please."
 ];
 
 const UI = {
@@ -54,10 +44,6 @@ let timerInterval = null;
 let baselineMotion = { x: 0, y: 0, z: 0 };
 let isCalibrating = false;
 let settleTimeout = null;
-let praiseTimeout = null;
-
-let disturbanceCount = 0;
-let continuousFocusTime = 0;
 
 // Initialize events
 UI.startBtn.addEventListener('click', startSession);
@@ -119,8 +105,6 @@ async function startSession() {
     
     PetState.set(PetState.SLEEPING);
     PetState.isDisturbed = false;
-    disturbanceCount = 0;
-    continuousFocusTime = 0;
     
     await requestWakeLock();
     
@@ -138,30 +122,7 @@ function tick() {
         completeSession();
     } else {
         updateTimerDisplay(remaining);
-        
-        if (PetState.current === PetState.SLEEPING) {
-            continuousFocusTime++;
-            if (continuousFocusTime === 300) { // 5 minutes (300 seconds)
-                showPraise();
-            }
-        }
     }
-}
-
-function showPraise() {
-    PetState.set(PetState.HAPPY);
-    UI.msgContainer.classList.add('happy-msg');
-    showMessage("Good going Sam, please let me rest like this. You are a good boy.");
-    
-    clearTimeout(praiseTimeout);
-    praiseTimeout = setTimeout(() => {
-        // Only revert if we haven't been disturbed and session isn't over
-        if (PetState.current === PetState.HAPPY && !PetState.isDisturbed && timerInterval !== null) {
-            PetState.set(PetState.SLEEPING);
-            hideMessage();
-            UI.msgContainer.classList.remove('happy-msg');
-        }
-    }, 5000); // show praise for 5 seconds
 }
 
 function updateTimerDisplay(msRemaining) {
@@ -222,62 +183,46 @@ function monitorMotion(e) {
 }
 
 function handleDisturbance(severity = 'angry') {
-    if (timerInterval === null) return; // Session complete, ignore
-    
-    // Disturbance resets good behavior streak
-    continuousFocusTime = 0;
-    clearTimeout(praiseTimeout);
-    UI.msgContainer.classList.remove('happy-msg');
+    if (PetState.current === PetState.HAPPY) return;
     
     if (!PetState.isDisturbed) {
         PetState.isDisturbed = true;
-        disturbanceCount++;
         
         // Wake up quickly
         PetState.set(PetState.WAKE);
         
         // Then transition to angry or sad state shortly after
         setTimeout(() => {
-            if (timerInterval !== null) { // Check if session is still active
-                let msgList;
-                if (disturbanceCount >= 3) {
-                    msgList = CRYING_MESSAGES;
-                    severity = 'sad'; // Force sad crying eyes if shaken repeatedly
-                } else {
-                    msgList = severity === 'sad' ? SAD_MESSAGES : ANGRY_MESSAGES;
-                }
-                
-                const msg = msgList[Math.floor(Math.random() * msgList.length)];
-
+            if (PetState.current !== PetState.HAPPY) {
                 if (severity === 'sad') {
                     PetState.set(PetState.SAD);
                     UI.msgContainer.classList.add('sad-msg');
-                    showMessage(msg);
+                    showMessage("Don't disturb me and work.");
                 } else {
                     PetState.set(PetState.ANGRY);
                     UI.msgContainer.classList.remove('sad-msg');
-                    showMessage(msg);
+                    showMessage(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
                 }
             }
         }, 300);
     } else {
-        // Escalate to angry if already sad but shaken harder, unless they are crying
-        if (severity === 'angry' && PetState.current === PetState.SAD && disturbanceCount < 3) {
+        // Escalate to angry if already sad but shaken harder
+        if (severity === 'angry' && PetState.current === PetState.SAD) {
             PetState.set(PetState.ANGRY);
             UI.msgContainer.classList.remove('sad-msg');
-            showMessage(ANGRY_MESSAGES[Math.floor(Math.random() * ANGRY_MESSAGES.length)]);
+            showMessage(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
         }
     }
     
     // Reset the settle cooldown on continuous disturbance
     clearTimeout(settleTimeout);
     settleTimeout = setTimeout(() => {
-        if (timerInterval !== null) {
+        if (PetState.current !== PetState.HAPPY) {
             PetState.set(PetState.BLINK);
             hideMessage();
             
             setTimeout(() => {
-                if (timerInterval !== null) {
+                if (PetState.current !== PetState.HAPPY) {
                     PetState.set(PetState.SLEEPING);
                     PetState.isDisturbed = false;
                 }
@@ -297,10 +242,8 @@ function hideMessage() {
 
 function completeSession() {
     clearInterval(timerInterval);
-    timerInterval = null; // Mark session as inactive
     window.removeEventListener('devicemotion', monitorMotion);
     clearTimeout(settleTimeout);
-    clearTimeout(praiseTimeout);
     
     if (wakeLock !== null) {
         wakeLock.release().catch(() => {});
