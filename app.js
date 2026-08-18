@@ -46,6 +46,7 @@ const UI = {
     msgContainer: document.getElementById('message-container'),
     statsContainer: document.getElementById('stats-container'),
     loveFill: document.getElementById('love-fill'),
+    datetimeDisplay: document.getElementById('datetime-display'),
     timerDisplay: document.getElementById('timer-display'),
     restartBtn: document.getElementById('restart-btn'),
     fullscreenToggle: document.getElementById('fullscreen-toggle'),
@@ -111,6 +112,14 @@ function getDailyStats() {
     }
     return parseInt(localStorage.getItem('focusPet_daily_minutes') || '0', 10);
 }
+
+function updateDateTime() {
+    const now = new Date();
+    const options = { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    UI.datetimeDisplay.textContent = now.toLocaleDateString('en-US', options);
+}
+setInterval(updateDateTime, 1000);
+updateDateTime();
 
 // Initialize events
 updateLoveMeter(0); // Set initial UI

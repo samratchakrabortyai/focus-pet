@@ -124,11 +124,22 @@ button:hover {
 .tiny-timer {
     position: absolute;
     top: 20px;
-    right: 25px;
-    font-size: 1rem;
-    color: rgba(255, 255, 255, 0.2);
-    font-variant-numeric: tabular-nums;
-    transition: opacity 0.3s;
+    right: 20px;
+    font-size: 1.5rem;
+    opacity: 0.8;
+    font-family: monospace;
+    z-index: 100;
+}
+
+#datetime-display {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.6);
+    z-index: 100;
+    font-family: monospace;
 }
 
 #message-container {
@@ -193,8 +204,8 @@ button:hover {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 50; /* Above most things, below love meter and maybe timer */
+    background: rgba(0, 0, 0, 1);
+    z-index: 50; /* Above most things, below love meter and timer */
     pointer-events: none;
     transition: opacity 1.5s ease-in-out;
 }
