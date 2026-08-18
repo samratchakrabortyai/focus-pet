@@ -48,6 +48,7 @@ const UI = {
     loveFill: document.getElementById('love-fill'),
     datetimeDisplay: document.getElementById('datetime-display'),
     toggleClockCb: document.getElementById('toggle-clock-cb'),
+    mouth: document.getElementById('mouth'),
     timerDisplay: document.getElementById('timer-display'),
     restartBtn: document.getElementById('restart-btn'),
     fullscreenToggle: document.getElementById('fullscreen-toggle'),
@@ -309,10 +310,15 @@ function handleDisturbance(severity = 'angry') {
         
         // Remove pampering class momentarily to reset the CSS animation
         UI.eyes.classList.remove('pampering');
+        UI.mouth.classList.remove('tongue-out');
         void UI.eyes.offsetWidth; // Trigger reflow
         PetState.set(PetState.PAMPERING);
+        UI.mouth.classList.add('tongue-out');
         
-        setTimeout(() => { PetState.isDisturbed = false; }, 800);
+        setTimeout(() => { 
+            PetState.isDisturbed = false; 
+            UI.mouth.classList.remove('tongue-out');
+        }, 800);
         return;
     }
 

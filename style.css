@@ -262,6 +262,32 @@ button:hover {
     animation: pamperHop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
+.eyes-container.pampering .eye {
+    border-radius: 60px 60px 10px 10px;
+    transform: scaleY(0.7) scaleX(1.1);
+    background: #ff758c; /* Slightly pinkish flush when happy */
+}
+
+.mouth {
+    width: 25px;
+    height: 10px;
+    background: transparent;
+    border-radius: 0 0 25px 25px;
+    margin-top: 15px;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: scale(0) translateY(-10px);
+}
+
+.mouth.tongue-out {
+    width: 20px;
+    height: 35px;
+    background: #ff758c;
+    border-radius: 0 0 20px 20px;
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
 .eye {
     background: #fff;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
