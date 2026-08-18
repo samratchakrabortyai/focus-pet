@@ -125,6 +125,26 @@ button:hover {
     text-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
 }
 
+#stats-container {
+    margin-top: 1.5rem;
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    transition: opacity 0.5s;
+    line-height: 1.6;
+}
+
+#stats-container.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#stats-container span {
+    color: #4facfe;
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
 /* Eye Styles */
 #pet-container {
     display: flex;

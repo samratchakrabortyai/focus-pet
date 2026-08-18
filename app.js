@@ -44,6 +44,7 @@ const UI = {
     startBtn: document.getElementById('start-btn'),
     eyes: document.getElementById('eyes'),
     msgContainer: document.getElementById('message-container'),
+    statsContainer: document.getElementById('stats-container'),
     timerDisplay: document.getElementById('timer-display'),
     restartBtn: document.getElementById('restart-btn'),
     fullscreenToggle: document.getElementById('fullscreen-toggle')
@@ -78,6 +79,7 @@ let praiseTimeout = null;
 let disturbanceCount = 0;
 let continuousFocusTime = 0;
 let lastMessage = "";
+let currentSessionMinutes = 0;
 
 // Initialize events
 UI.startBtn.addEventListener('click', startSession);
@@ -127,14 +129,15 @@ async function requestWakeLock() {
 }
 
 async function startSession() {
-    const minutes = parseInt(UI.durationSelect.value, 10);
-    sessionEndTime = Date.now() + minutes * 60 * 1000;
+    currentSessionMinutes = parseInt(UI.durationSelect.value, 10);
+    sessionEndTime = Date.now() + currentSessionMinutes * 60 * 1000;
     
     // Switch UI
     UI.startScreen.classList.add('hidden');
     UI.focusScreen.classList.remove('hidden');
     UI.restartBtn.classList.add('hidden');
     UI.msgContainer.classList.add('hidden');
+    UI.statsContainer.classList.add('hidden');
     UI.msgContainer.classList.remove('happy-msg');
     
     PetState.set(PetState.SLEEPING);
@@ -346,6 +349,20 @@ function completeSession() {
     PetState.set(PetState.HAPPY);
     PetState.isDisturbed = false;
     
+    // Calculate and save stats
+    let totalSessions = parseInt(localStorage.getItem('focusPet_sessions') || '0', 10);
+    let totalMinutes = parseInt(localStorage.getItem('focusPet_minutes') || '0', 10);
+
+    totalSessions += 1;
+    totalMinutes += currentSessionMinutes;
+
+    localStorage.setItem('focusPet_sessions', totalSessions.toString());
+    localStorage.setItem('focusPet_minutes', totalMinutes.toString());
+
+    // Display Stats
+    UI.statsContainer.innerHTML = `Sessions Completed: <span>${totalSessions}</span> <br> Total Time Focused: <span>${totalMinutes} mins</span>`;
+    UI.statsContainer.classList.remove('hidden');
+
     UI.msgContainer.classList.add('happy-msg');
     showMessage("You did it!");
     
@@ -355,5 +372,6 @@ function completeSession() {
 
 function resetSession() {
     UI.focusScreen.classList.add('hidden');
+    UI.statsContainer.classList.add('hidden');
     UI.startScreen.classList.remove('hidden');
 }
