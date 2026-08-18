@@ -120,6 +120,14 @@ button:hover {
     text-shadow: 0 0 20px rgba(168, 192, 255, 0.6);
 }
 
+#message-container.furious-msg {
+    color: #ff0000;
+    text-shadow: 0 0 30px rgba(255, 0, 0, 0.9);
+    font-size: 2.2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
 #message-container.happy-msg {
     color: #4facfe;
     text-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
@@ -211,6 +219,36 @@ button:hover {
 }
 .angry .right-eye {
     transform: rotate(-18deg) translateY(5px);
+}
+
+/* Furious State */
+.furious .eye {
+    height: 60px;
+    width: 90px;
+    border-radius: 50% 50% 10% 10%;
+    background: #ff0000;
+    box-shadow: 0 0 60px 25px rgba(255, 0, 0, 0.8);
+    animation: furiousShake 0.1s infinite;
+}
+.furious .left-eye {
+    transform: rotate(25deg) translateY(10px);
+}
+.furious .right-eye {
+    transform: rotate(-25deg) translateY(10px);
+}
+
+@keyframes furiousShake {
+    0% { transform: translate(2px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(0px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(2px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(2px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
 }
 
 /* Sad State */

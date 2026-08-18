@@ -56,6 +56,7 @@ const PetState = {
     ANGRY: 'angry',
     SAD: 'sad',
     CRYING: 'crying',
+    FURIOUS: 'furious',
     BLINK: 'blink',
     HAPPY: 'happy',
     
@@ -263,7 +264,13 @@ function handleDisturbance(severity = 'angry') {
         setTimeout(() => {
             if (timerInterval !== null) { // Check if session is still active
                 let msgList;
-                if (disturbanceCount === 3) {
+                if (disturbanceCount >= 10) {
+                    severity = 'furious';
+                    msgList = ["I hate you, Sam!"];
+                } else if (disturbanceCount === 9) {
+                    severity = 'angry';
+                    msgList = ["This is your last warning, Sam."];
+                } else if (disturbanceCount === 3) {
                     msgList = CRYING_MESSAGES;
                     severity = 'crying'; // Force sad crying eyes on the 3rd shake
                 } else if (disturbanceCount > 3) {
@@ -279,7 +286,14 @@ function handleDisturbance(severity = 'angry') {
                 } while (msg === lastMessage && msgList.length > 1);
                 lastMessage = msg;
 
-                if (severity === 'sad') {
+                if (severity === 'furious') {
+                    PetState.set(PetState.FURIOUS);
+                    UI.msgContainer.classList.remove('sad-msg');
+                    UI.msgContainer.classList.add('furious-msg');
+                    showMessage(msg);
+                    failSession();
+                    return; // Halt further actions
+                } else if (severity === 'sad') {
                     PetState.set(PetState.SAD);
                     UI.msgContainer.classList.add('sad-msg');
                     showMessage(msg);
@@ -308,21 +322,24 @@ function handleDisturbance(severity = 'angry') {
         }
     }
     
-    // Reset the settle cooldown on continuous disturbance
-    clearTimeout(settleTimeout);
-    settleTimeout = setTimeout(() => {
-        if (timerInterval !== null) {
-            PetState.set(PetState.BLINK);
-            hideMessage();
-            
-            setTimeout(() => {
-                if (timerInterval !== null) {
-                    PetState.set(PetState.SLEEPING);
-                    PetState.isDisturbed = false;
-                }
-            }, 150); // Short blink duration
-        }
-    }, COOLDOWN_TIME);
+    // Reset the settle cooldown on continuous disturbance (skip if furious)
+    if (PetState.current !== PetState.FURIOUS) {
+        clearTimeout(settleTimeout);
+        settleTimeout = setTimeout(() => {
+            if (timerInterval !== null) {
+                PetState.set(PetState.BLINK);
+                hideMessage();
+                UI.msgContainer.classList.remove('furious-msg');
+                
+                setTimeout(() => {
+                    if (timerInterval !== null) {
+                        PetState.set(PetState.SLEEPING);
+                        PetState.isDisturbed = false;
+                    }
+                }, 150); // Short blink duration
+            }
+        }, COOLDOWN_TIME);
+    }
 }
 
 function showMessage(msg) {
@@ -332,6 +349,26 @@ function showMessage(msg) {
 
 function hideMessage() {
     UI.msgContainer.classList.add('hidden');
+}
+
+function failSession() {
+    clearInterval(timerInterval);
+    timerInterval = null; // Mark session as inactive
+    window.removeEventListener('devicemotion', monitorMotion);
+    clearTimeout(settleTimeout);
+    clearTimeout(praiseTimeout);
+    
+    if (wakeLock !== null) {
+        wakeLock.release().catch(() => {});
+        wakeLock = null;
+    }
+
+    setTimeout(() => {
+        UI.msgContainer.classList.remove('furious-msg');
+        showMessage("I am disappointed with you, Sam.");
+        UI.timerDisplay.textContent = "";
+        UI.restartBtn.classList.remove('hidden');
+    }, 2000); // 2 seconds of furious before fail state
 }
 
 function completeSession() {
