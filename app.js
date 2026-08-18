@@ -48,7 +48,8 @@ const UI = {
     loveFill: document.getElementById('love-fill'),
     timerDisplay: document.getElementById('timer-display'),
     restartBtn: document.getElementById('restart-btn'),
-    fullscreenToggle: document.getElementById('fullscreen-toggle')
+    fullscreenToggle: document.getElementById('fullscreen-toggle'),
+    dimOverlay: document.getElementById('dim-overlay')
 };
 
 const PetState = {
@@ -60,13 +61,21 @@ const PetState = {
     FURIOUS: 'furious',
     BLINK: 'blink',
     HAPPY: 'happy',
+    PAMPERING: 'happy', // Pamper mode uses happy eyes
     
     current: 'sleeping',
-    isDisturbed: false, // Prevents multiple rapid disturbance triggers overlapping
+    isDisturbed: false,
     
     set(newState) {
         this.current = newState;
         UI.eyes.className = `eyes-container ${newState}`;
+        
+        // Software Dimming Logic
+        if (newState === 'sleeping') {
+            UI.dimOverlay.classList.remove('hidden');
+        } else {
+            UI.dimOverlay.classList.add('hidden');
+        }
     }
 };
 
@@ -90,6 +99,17 @@ function updateLoveMeter(change = 0) {
     if (loveLevel < 0) loveLevel = 0;
     localStorage.setItem('focusPet_love', loveLevel.toString());
     UI.loveFill.style.width = `${loveLevel}%`;
+}
+
+function getDailyStats() {
+    const today = new Date().toISOString().split('T')[0];
+    const savedDate = localStorage.getItem('focusPet_daily_date');
+    if (savedDate !== today) {
+        localStorage.setItem('focusPet_daily_date', today);
+        localStorage.setItem('focusPet_daily_minutes', '0');
+        return 0;
+    }
+    return parseInt(localStorage.getItem('focusPet_daily_minutes') || '0', 10);
 }
 
 // Initialize events
@@ -258,8 +278,19 @@ function monitorMotion(e) {
 }
 
 function handleDisturbance(severity = 'angry') {
-    if (timerInterval === null) return; // Session complete, ignore
+    if (timerInterval === null && PetState.current !== PetState.PAMPERING) return; // Session complete and not pampering, ignore
     
+    if (PetState.current === PetState.PAMPERING) {
+        // Pamper Mode Logic
+        const pamperMsgs = ["Hehe, that tickles! 😘", "I love you Sam! 💋", "More pets please! ❤️", "Yay! 😘", "So comfy! ❤️"];
+        let msg = pamperMsgs[Math.floor(Math.random() * pamperMsgs.length)];
+        UI.msgContainer.classList.add('happy-msg');
+        showMessage(msg);
+        PetState.set(PetState.BLINK);
+        setTimeout(() => PetState.set(PetState.PAMPERING), 150);
+        return;
+    }
+
     // Disturbance penalty
     updateLoveMeter(-2);
     
@@ -393,36 +424,64 @@ function completeSession() {
     clearTimeout(settleTimeout);
     clearTimeout(praiseTimeout);
     
+    UI.dimOverlay.classList.add('hidden'); // Ensure dimmer is off
+
     if (wakeLock !== null) {
         wakeLock.release().catch(() => {});
         wakeLock = null;
     }
     
-    PetState.set(PetState.HAPPY);
-    PetState.isDisturbed = false;
-    
     // Calculate and save stats
     let totalSessions = parseInt(localStorage.getItem('focusPet_sessions') || '0', 10);
     let totalMinutes = parseInt(localStorage.getItem('focusPet_minutes') || '0', 10);
+    let dailyMinutes = getDailyStats();
 
     totalSessions += 1;
     totalMinutes += currentSessionMinutes;
+    dailyMinutes += currentSessionMinutes;
 
     localStorage.setItem('focusPet_sessions', totalSessions.toString());
     localStorage.setItem('focusPet_minutes', totalMinutes.toString());
+    localStorage.setItem('focusPet_daily_minutes', dailyMinutes.toString());
 
     // Display Stats
-    UI.statsContainer.innerHTML = `Sessions Completed: <span>${totalSessions}</span> <br> Total Time Focused: <span>${totalMinutes} mins</span>`;
+    UI.statsContainer.innerHTML = `Daily Focus: <span>${dailyMinutes} mins</span> <br> Total Focus: <span>${totalMinutes} mins</span>`;
     UI.statsContainer.classList.remove('hidden');
 
     UI.msgContainer.classList.add('happy-msg');
-    showMessage("You did it!");
+    
+    // Pamper Mode Calculation
+    let pamperMinutes = 0;
+    if (currentSessionMinutes === 1 || currentSessionMinutes === 20) {
+        pamperMinutes = 1;
+    } else if (currentSessionMinutes >= 30) {
+        pamperMinutes = 2;
+    }
+
+    if (pamperMinutes > 0) {
+        PetState.set(PetState.PAMPERING);
+        PetState.isDisturbed = false;
+        showMessage(`You did it! 😘 💋 ❤️ <br><br> <span style="font-size:1rem;color:#ccc;">(Pamper Mode: ${pamperMinutes} min - shake to pet me!)</span>`);
+        
+        setTimeout(() => {
+            if (PetState.current === PetState.PAMPERING || PetState.current === PetState.BLINK) {
+                PetState.set(PetState.HAPPY);
+                showMessage("You did it! 😘 💋 ❤️");
+                UI.restartBtn.classList.remove('hidden');
+            }
+        }, pamperMinutes * 60 * 1000);
+    } else {
+        PetState.set(PetState.HAPPY);
+        PetState.isDisturbed = false;
+        showMessage("You did it! 😘 💋 ❤️");
+        UI.restartBtn.classList.remove('hidden');
+    }
     
     UI.timerDisplay.textContent = "";
-    UI.restartBtn.classList.remove('hidden');
 }
 
 function resetSession() {
+    PetState.current = PetState.WAKE; // Escape pamper mode if active
     UI.focusScreen.classList.add('hidden');
     UI.statsContainer.classList.add('hidden');
     UI.startScreen.classList.remove('hidden');

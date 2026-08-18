@@ -184,7 +184,23 @@ button:hover {
 #stats-container span {
     color: #4facfe;
     font-weight: 700;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
+}
+
+#dim-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 50; /* Above most things, below love meter and maybe timer */
+    pointer-events: none;
+    transition: opacity 1.5s ease-in-out;
+}
+
+#dim-overlay.hidden {
+    opacity: 0;
 }
 
 /* Eye Styles */
