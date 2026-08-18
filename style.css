@@ -100,6 +100,20 @@ select:focus {
     background-color: rgba(255,255,255,0.1);
 }
 
+.clock-toggle-label {
+    margin-top: 15px;
+    color: rgba(255,255,255,0.7);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.clock-toggle-label input {
+    cursor: pointer;
+}
+
 button {
     font-size: 1.2rem;
     padding: 1rem 3rem;
@@ -139,6 +153,12 @@ button:hover {
     color: rgba(255, 255, 255, 0.4);
     z-index: 100;
     font-family: monospace;
+    transition: opacity 0.3s ease;
+}
+
+#datetime-display.hidden {
+    opacity: 0;
+    pointer-events: none;
 }
 
 #message-container {
@@ -224,12 +244,22 @@ button:hover {
     z-index: 100; /* Keep eyes above the dimmer */
 }
 
+@keyframes pamperHop {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-30px); }
+}
+
 .eyes-container {
     display: flex;
     gap: 50px;
     justify-content: center;
     align-items: center;
+    transition: transform 0.3s ease;
     height: 120px;
+}
+
+.eyes-container.pampering {
+    animation: pamperHop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .eye {

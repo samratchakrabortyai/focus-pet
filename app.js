@@ -47,6 +47,7 @@ const UI = {
     statsContainer: document.getElementById('stats-container'),
     loveFill: document.getElementById('love-fill'),
     datetimeDisplay: document.getElementById('datetime-display'),
+    toggleClockCb: document.getElementById('toggle-clock-cb'),
     timerDisplay: document.getElementById('timer-display'),
     restartBtn: document.getElementById('restart-btn'),
     fullscreenToggle: document.getElementById('fullscreen-toggle'),
@@ -62,7 +63,7 @@ const PetState = {
     FURIOUS: 'furious',
     BLINK: 'blink',
     HAPPY: 'happy',
-    PAMPERING: 'happy', // Pamper mode uses happy eyes
+    PAMPERING: 'happy pampering', // Pamper mode uses happy eyes + hop animation
     
     current: 'sleeping',
     isDisturbed: false,
@@ -126,7 +127,14 @@ updateLoveMeter(0); // Set initial UI
 UI.startBtn.addEventListener('click', startSession);
 UI.restartBtn.addEventListener('click', resetSession);
 
-// Fullscreen toggle
+UI.toggleClockCb.addEventListener('change', (e) => {
+    if (e.target.checked) {
+        UI.datetimeDisplay.classList.remove('hidden');
+    } else {
+        UI.datetimeDisplay.classList.add('hidden');
+    }
+});
+
 UI.fullscreenToggle.addEventListener('click', (e) => {
     e.stopPropagation(); // prevent triggering focus screen disturbance
     toggleFullscreen();
@@ -295,8 +303,12 @@ function handleDisturbance(severity = 'angry') {
         let msg = pamperMsgs[Math.floor(Math.random() * pamperMsgs.length)];
         UI.msgContainer.classList.add('happy-msg');
         showMessage(msg);
-        PetState.set(PetState.BLINK);
-        setTimeout(() => PetState.set(PetState.PAMPERING), 150);
+        
+        // Remove pampering class momentarily to reset the CSS animation
+        UI.eyes.classList.remove('pampering');
+        void UI.eyes.offsetWidth; // Trigger reflow
+        PetState.set(PetState.PAMPERING);
+        
         return;
     }
 
@@ -429,7 +441,6 @@ function failSession() {
 function completeSession() {
     clearInterval(timerInterval);
     timerInterval = null; // Mark session as inactive
-    window.removeEventListener('devicemotion', monitorMotion);
     clearTimeout(settleTimeout);
     clearTimeout(praiseTimeout);
     
@@ -470,16 +481,18 @@ function completeSession() {
     if (pamperMinutes > 0) {
         PetState.set(PetState.PAMPERING);
         PetState.isDisturbed = false;
-        showMessage(`You did it! 😘 💋 ❤️ <br><br> <span style="font-size:1rem;color:#ccc;">(Pamper Mode: ${pamperMinutes} min - shake to pet me!)</span>`);
+        showMessage(`You did it! 😘 💋 ❤️ <br><br> Pamper mode active. Shake to pet me!`);
         
         setTimeout(() => {
-            if (PetState.current === PetState.PAMPERING || PetState.current === PetState.BLINK) {
+            window.removeEventListener('devicemotion', monitorMotion);
+            if (PetState.current === PetState.PAMPERING) {
                 PetState.set(PetState.HAPPY);
                 showMessage("You did it! 😘 💋 ❤️");
                 UI.restartBtn.classList.remove('hidden');
             }
         }, pamperMinutes * 60 * 1000);
     } else {
+        window.removeEventListener('devicemotion', monitorMotion);
         PetState.set(PetState.HAPPY);
         PetState.isDisturbed = false;
         showMessage("You did it! 😘 💋 ❤️");
