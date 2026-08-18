@@ -260,9 +260,12 @@ function handleDisturbance(severity = 'angry') {
         setTimeout(() => {
             if (timerInterval !== null) { // Check if session is still active
                 let msgList;
-                if (disturbanceCount >= 3) {
+                if (disturbanceCount === 3) {
                     msgList = CRYING_MESSAGES;
-                    severity = 'crying'; // Force sad crying eyes if shaken repeatedly
+                    severity = 'crying'; // Force sad crying eyes on the 3rd shake
+                } else if (disturbanceCount > 3) {
+                    msgList = ANGRY_MESSAGES;
+                    severity = 'angry'; // Force angry eyes on the 4th shake and beyond
                 } else {
                     msgList = severity === 'sad' ? SAD_MESSAGES : ANGRY_MESSAGES;
                 }
