@@ -420,7 +420,7 @@ function handleDisturbance(severity = 'angry') {
 }
 
 function showMessage(msg) {
-    UI.msgContainer.textContent = msg;
+    UI.msgContainer.innerHTML = msg;
     UI.msgContainer.classList.remove('hidden');
 }
 
