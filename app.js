@@ -298,8 +298,11 @@ function handleDisturbance(severity = 'angry') {
     if (timerInterval === null && PetState.current !== PetState.PAMPERING) return; // Session complete and not pampering, ignore
     
     if (PetState.current === PetState.PAMPERING) {
+        if (PetState.isDisturbed) return; // Prevent spamming
+        PetState.isDisturbed = true;
+
         // Pamper Mode Logic
-        const pamperMsgs = ["Hehe, that tickles! 😘", "I love you Sam! 💋", "More pets please! ❤️", "Yay! 😘", "So comfy! ❤️"];
+        const pamperMsgs = ["Hehe, that tickles! 😘", "I love you Sam! ❤️", "More pets please! ❤️", "Yay! 😘", "So comfy! ❤️"];
         let msg = pamperMsgs[Math.floor(Math.random() * pamperMsgs.length)];
         UI.msgContainer.classList.add('happy-msg');
         showMessage(msg);
@@ -309,6 +312,7 @@ function handleDisturbance(severity = 'angry') {
         void UI.eyes.offsetWidth; // Trigger reflow
         PetState.set(PetState.PAMPERING);
         
+        setTimeout(() => { PetState.isDisturbed = false; }, 800);
         return;
     }
 
@@ -481,13 +485,13 @@ function completeSession() {
     if (pamperMinutes > 0) {
         PetState.set(PetState.PAMPERING);
         PetState.isDisturbed = false;
-        showMessage(`You did it! 😘 💋 ❤️ <br><br> Pamper mode active. Shake to pet me!`);
+        showMessage(`You did it! 😘 ❤️ <br><br> Pamper mode active. Shake to pet me!`);
         
         setTimeout(() => {
             window.removeEventListener('devicemotion', monitorMotion);
             if (PetState.current === PetState.PAMPERING) {
                 PetState.set(PetState.HAPPY);
-                showMessage("You did it! 😘 💋 ❤️");
+                showMessage("You did it! 😘 ❤️");
                 UI.restartBtn.classList.remove('hidden');
             }
         }, pamperMinutes * 60 * 1000);
@@ -495,7 +499,7 @@ function completeSession() {
         window.removeEventListener('devicemotion', monitorMotion);
         PetState.set(PetState.HAPPY);
         PetState.isDisturbed = false;
-        showMessage("You did it! 😘 💋 ❤️");
+        showMessage("You did it! 😘 ❤️");
         UI.restartBtn.classList.remove('hidden');
     }
     
