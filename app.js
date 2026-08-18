@@ -45,6 +45,7 @@ const UI = {
     eyes: document.getElementById('eyes'),
     msgContainer: document.getElementById('message-container'),
     statsContainer: document.getElementById('stats-container'),
+    loveFill: document.getElementById('love-fill'),
     timerDisplay: document.getElementById('timer-display'),
     restartBtn: document.getElementById('restart-btn'),
     fullscreenToggle: document.getElementById('fullscreen-toggle')
@@ -81,8 +82,18 @@ let disturbanceCount = 0;
 let continuousFocusTime = 0;
 let lastMessage = "";
 let currentSessionMinutes = 0;
+let loveLevel = parseInt(localStorage.getItem('focusPet_love') || '50', 10);
+
+function updateLoveMeter(change = 0) {
+    loveLevel += change;
+    if (loveLevel > 100) loveLevel = 100;
+    if (loveLevel < 0) loveLevel = 0;
+    localStorage.setItem('focusPet_love', loveLevel.toString());
+    UI.loveFill.style.width = `${loveLevel}%`;
+}
 
 // Initialize events
+updateLoveMeter(0); // Set initial UI
 UI.startBtn.addEventListener('click', startSession);
 UI.restartBtn.addEventListener('click', resetSession);
 
@@ -165,8 +176,9 @@ function tick() {
         
         if (PetState.current === PetState.SLEEPING) {
             continuousFocusTime++;
-            if (continuousFocusTime === 300) { // 5 minutes (300 seconds)
+            if (continuousFocusTime > 0 && continuousFocusTime % 300 === 0) { // Every 5 minutes
                 showPraise();
+                updateLoveMeter(5);
             }
         }
     }
@@ -247,6 +259,9 @@ function monitorMotion(e) {
 
 function handleDisturbance(severity = 'angry') {
     if (timerInterval === null) return; // Session complete, ignore
+    
+    // Disturbance penalty
+    updateLoveMeter(-2);
     
     // Disturbance resets good behavior streak
     continuousFocusTime = 0;
