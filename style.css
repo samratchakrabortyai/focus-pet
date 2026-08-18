@@ -270,7 +270,8 @@ button:hover {
 
 .eyes-container.pampering .eye::before {
     opacity: 1;
-    transform: translate(-10%, 40%) scale(1.1); /* Cross-eyed cute look */
+    top: 60%;
+    left: 45%;
 }
 
 .mouth {
