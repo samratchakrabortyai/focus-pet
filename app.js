@@ -16,7 +16,8 @@ const UI = {
     eyes: document.getElementById('eyes'),
     msgContainer: document.getElementById('message-container'),
     timerDisplay: document.getElementById('timer-display'),
-    restartBtn: document.getElementById('restart-btn')
+    restartBtn: document.getElementById('restart-btn'),
+    fullscreenToggle: document.getElementById('fullscreen-toggle')
 };
 
 const PetState = {
@@ -45,6 +46,24 @@ let settleTimeout = null;
 // Initialize events
 UI.startBtn.addEventListener('click', startSession);
 UI.restartBtn.addEventListener('click', resetSession);
+
+// Fullscreen toggle
+UI.fullscreenToggle.addEventListener('click', (e) => {
+    e.stopPropagation(); // prevent triggering focus screen disturbance
+    toggleFullscreen();
+});
+
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.warn(`Error attempting to enable fullscreen: ${err.message}`);
+        });
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
+}
 
 // Listen to touches anywhere on the focus screen
 UI.focusScreen.addEventListener('touchstart', (e) => {
