@@ -115,6 +115,11 @@ button:hover {
     transform: translateY(10px);
 }
 
+#message-container.sad-msg {
+    color: #a8c0ff;
+    text-shadow: 0 0 20px rgba(168, 192, 255, 0.6);
+}
+
 #message-container.happy-msg {
     color: #4facfe;
     text-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
@@ -186,6 +191,21 @@ button:hover {
 }
 .angry .right-eye {
     transform: rotate(-18deg) translateY(5px);
+}
+
+/* Sad State */
+.sad .eye {
+    height: 40px;
+    width: 70px;
+    border-radius: 50% 50% 20% 20%;
+    background: #a8c0ff;
+    box-shadow: 0 0 30px 10px rgba(168, 192, 255, 0.4);
+}
+.sad .left-eye {
+    transform: rotate(-15deg) translateY(10px);
+}
+.sad .right-eye {
+    transform: rotate(15deg) translateY(10px);
 }
 
 /* Happy State */

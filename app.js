@@ -1,4 +1,5 @@
-const MOTION_THRESHOLD = 2.0; // m/s^2 deviation to trigger a disturbance
+const MOTION_THRESHOLD_LOW = 1.0; // m/s^2 deviation for slight shake (sad)
+const MOTION_THRESHOLD_HIGH = 2.5; // m/s^2 deviation for strong shake (angry)
 const COOLDOWN_TIME = 4000;   // ms before settling back to sleep
 
 const MESSAGES = [
@@ -24,6 +25,7 @@ const PetState = {
     SLEEPING: 'sleeping',
     WAKE: 'wake',
     ANGRY: 'angry',
+    SAD: 'sad',
     BLINK: 'blink',
     HAPPY: 'happy',
     
@@ -67,10 +69,10 @@ function toggleFullscreen() {
 
 // Listen to touches anywhere on the focus screen
 UI.focusScreen.addEventListener('touchstart', (e) => {
-    if (e.target.id !== 'restart-btn') handleDisturbance();
+    if (!e.target.closest('#fullscreen-toggle') && e.target.id !== 'restart-btn') handleDisturbance('angry');
 });
 UI.focusScreen.addEventListener('click', (e) => {
-    if (e.target.id !== 'restart-btn') handleDisturbance();
+    if (!e.target.closest('#fullscreen-toggle') && e.target.id !== 'restart-btn') handleDisturbance('angry');
 });
 
 // Re-acquire wake lock if tab is hidden and shown again (Chrome behaviour)
@@ -173,12 +175,14 @@ function monitorMotion(e) {
     
     const totalDeviation = Math.sqrt(dx*dx + dy*dy + dz*dz);
     
-    if (totalDeviation > MOTION_THRESHOLD) {
-        handleDisturbance();
+    if (totalDeviation > MOTION_THRESHOLD_HIGH) {
+        handleDisturbance('angry');
+    } else if (totalDeviation > MOTION_THRESHOLD_LOW) {
+        handleDisturbance('sad');
     }
 }
 
-function handleDisturbance() {
+function handleDisturbance(severity = 'angry') {
     if (PetState.current === PetState.HAPPY) return;
     
     if (!PetState.isDisturbed) {
@@ -187,13 +191,27 @@ function handleDisturbance() {
         // Wake up quickly
         PetState.set(PetState.WAKE);
         
-        // Then transition to angry state shortly after
+        // Then transition to angry or sad state shortly after
         setTimeout(() => {
             if (PetState.current !== PetState.HAPPY) {
-                PetState.set(PetState.ANGRY);
-                showMessage(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
+                if (severity === 'sad') {
+                    PetState.set(PetState.SAD);
+                    UI.msgContainer.classList.add('sad-msg');
+                    showMessage("Don't disturb me and work.");
+                } else {
+                    PetState.set(PetState.ANGRY);
+                    UI.msgContainer.classList.remove('sad-msg');
+                    showMessage(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
+                }
             }
         }, 300);
+    } else {
+        // Escalate to angry if already sad but shaken harder
+        if (severity === 'angry' && PetState.current === PetState.SAD) {
+            PetState.set(PetState.ANGRY);
+            UI.msgContainer.classList.remove('sad-msg');
+            showMessage(MESSAGES[Math.floor(Math.random() * MESSAGES.length)]);
+        }
     }
     
     // Reset the settle cooldown on continuous disturbance
